@@ -23,3 +23,5 @@ curl -fsSL git.io/luci-app-amlogic | bash
 ```
 
 
+## License / 许可
+- [LICENSE](https://github.com/ophub/script/blob/main/LICENSE) © OPHUB
