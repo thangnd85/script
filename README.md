@@ -1,8 +1,8 @@
 # Some script
 
-## Armbian kernel update
+## Armbian kernel update (For Amlogic box)
 
-Provide the kernel update of the Armbian system provided by Flippy used in the Amlogic series box. Can be directly replaced to any series, such as 5.4 to 5.13.
+Provide the kernel update of the Armbian system provided by Flippy used in the Amlogic series box. Can be directly replaced to any series, such as 5.4 to 5.13. Enter any directory of the Armbian system, such as `cd /root`, and run the command directly.
 
 - The supported SOC types are: `s905x3`, `s905x2`, `s905x`, `s905d`, `s912`, `s922x`. When prompted `Please enter the SOC type of your device, such as s905x3:`, Please enter the SOC model of the current device.
 
@@ -11,4 +11,15 @@ Provide the kernel update of the Armbian system provided by Flippy used in the A
 ```shell
 bash <(curl -fsSL git.io/armbian-kernel)
 ```
+
+## OpenWrt kernel update (For Amlogic box)
+
+Provide luci operation support for Amlogic STB. The current functions include `install OpenWrt to EMMC`, `Manually Upload Updates / Download Updates Online to update the OpenWrt firmware or kernel`, `Backup / Restore firmware config` and `Custom firmware / kernel download site`, etc.
+
+Use SSH to log in to any directory of OpenWrt system, Or in the `System menu` → `TTYD terminal`, Run the onekey install command to automatically download and install this plugin. After the installation is complete, you can find the `Amlogic Service` plugin under the `System menu` of `OpenWrt`.
+
+```yaml
+curl -fsSL git.io/luci-app-amlogic | bash
+```
+
 
