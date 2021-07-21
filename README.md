@@ -9,7 +9,7 @@ Provide the kernel update of the Armbian system provided by Flippy used in the A
 - Support updated [kernel version](https://github.com/ophub/amlogic-s9xxx-openwrt/tree/main/amlogic-s9xxx/amlogic-kernel). When prompted `Please enter the kernel version number, such as 5.13.2:`, Please enter the kernel version number.
 
 ```shell
-# Run as root user
+# Run as root user (sudo -i)
 bash <(curl -fsSL git.io/armbian-kernel)
 ```
 
