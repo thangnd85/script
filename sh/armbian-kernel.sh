@@ -3,8 +3,10 @@
 # https://github.com/ophub/amlogic-s9xxx-openwrt
 # Description: Extract/Replace the kernel for Amlogic S9xxx OpenWrt and Armbian
 #
-# Note: Please grant execution permission before using the script: chmod +x replace-kernel
-# Kernel replace command: ./replace-kernel
+# When the kernel version is upgraded from 5.10 or lower to 5.10 or higher, need to install U-BOOT.
+# When there is no U-BOOT file in related directory, the script will auto try to download the file from the server for completion:
+# UBOOT_OVERLOAD: https://github.com/ophub/amlogic-s9xxx-openwrt/tree/main/amlogic-s9xxx/amlogic-u-boot"
+# MAINLINE_UBOOT: https://github.com/ophub/amlogic-s9xxx-openwrt/tree/main/amlogic-s9xxx/common-files/files/lib/u-boot
 #
 # Copyright (C) 2020-2021 Flippy
 # Copyright (C) 2020-2021 https://github.com/ophub/amlogic-s9xxx-openwrt
@@ -16,20 +18,10 @@ die() {
     exit 1
 }
 
-# Replace the kernel for Amlogic S9xxx OpenWrt and Armbian
-# Put the script and the kernel in the same directory
-# Support the kernel: boot-*.tar.gz, dtb-amlogic-*.tar.gz, modules-*.tar .gz
-#
-# When the kernel version is upgraded from 5.10 or lower to 5.10 or higher, need to install U-BOOT.
-# When there is no U-BOOT file in related directory, the script will auto try to download the file from the server for completion:
-# UBOOT_OVERLOAD: https://github.com/ophub/amlogic-s9xxx-openwrt/tree/main/amlogic-s9xxx/amlogic-u-boot"
-# MAINLINE_UBOOT: https://github.com/ophub/amlogic-s9xxx-openwrt/tree/main/amlogic-s9xxx/common-files/files/lib/u-boot
-#
 replace_kernel() {
 
     echo -e "Start update the openwrt kernel."
     # Operation environment check
-    # [ -x $0 ] || die "Please grant execution permission: chmod +x $0"
     EMMC_NAME=$(lsblk | grep -oE '(mmcblk[0-9])' | sort | uniq)
     P4_PATH="${PWD}"
 
