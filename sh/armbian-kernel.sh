@@ -29,7 +29,7 @@ replace_kernel() {
 
     echo -e "Start update the openwrt kernel."
     # Operation environment check
-    #[ -x $0 ] || die "Please grant execution permission: chmod +x $0"
+    # [ -x $0 ] || die "Please grant execution permission: chmod +x $0"
     EMMC_NAME=$(lsblk | grep -oE '(mmcblk[0-9])' | sort | uniq)
     P4_PATH="${PWD}"
 
