@@ -23,6 +23,14 @@ Use SSH to log in to any directory of OpenWrt system, Or in the `OpenWrt` → `S
 curl -fsSL git.io/luci-app-amlogic | bash
 ```
 
+## Ubuntu-2004-server compilation environment configuration
+
+
+```yaml
+sudo apt-get update -y
+sudo apt-get full-upgrade -y
+sudo apt-get install -y $(curl -fsSL git.io/ubuntu-2004-server)
+```
 
 ## License
 - [LICENSE](https://github.com/ophub/script/blob/main/LICENSE) © OPHUB
