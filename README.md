@@ -31,6 +31,8 @@ One-click installation of Kernel and OpenWrt compile common environment configur
 sudo apt-get update -y
 sudo apt-get full-upgrade -y
 sudo apt-get install -y $(curl -fsSL git.io/ubuntu-2004-server)
+sudo apt-get dist-upgrade
+sudo apt-get autoremove
 ```
 
 ## License
