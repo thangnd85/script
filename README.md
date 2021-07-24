@@ -23,8 +23,9 @@ Use SSH to log in to any directory of OpenWrt system, Or in the `OpenWrt` → `S
 curl -fsSL git.io/luci-app-amlogic | bash
 ```
 
-## Ubuntu-2004-server compilation environment configuration
+## Ubuntu-2004-server compilation environment
 
+One-click installation of Kernel and OpenWrt compile common environment configuration.
 
 ```yaml
 sudo apt-get update -y
