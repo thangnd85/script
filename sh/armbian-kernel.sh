@@ -1,7 +1,9 @@
 #!/bin/bash
 #==================================================================================================================================
-# https://github.com/ophub/amlogic-s9xxx-openwrt
-# Description: Extract/Replace the kernel for Amlogic S9xxx OpenWrt and Armbian
+# https://github.com/ophub/script
+#
+# Description: Armbian kernel update (For Amlogic box)
+# Kernel download: https://github.com/ophub/flippy-kernel/tree/main/library
 #
 # When the kernel version is upgraded from 5.10 or lower to 5.10 or higher, need to install U-BOOT.
 # When there is no U-BOOT file in related directory, the script will auto try to download the file from the server for completion:
