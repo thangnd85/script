@@ -37,7 +37,7 @@ replace_kernel() {
     # Download 3 kernel files
     if  [ $( ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l ) -ne 3 ]; then
 
-        SERVER_KERNEL_URL="https://api.github.com/repos/ophub/amlogic-s9xxx-openwrt/contents/amlogic-s9xxx/amlogic-kernel"
+        SERVER_KERNEL_URL="https://api.github.com/repos/ophub/flippy-kernel/contents/library"
         echo  "Please enter the kernel version number, such as 5.13.2: "
         read  KERNEL_NUM
         echo -e "Kernel version: ${KERNEL_NUM}"
