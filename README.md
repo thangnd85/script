@@ -25,12 +25,36 @@ curl -fsSL git.io/luci-app-amlogic | bash
 
 ## Ubuntu-2004-server compilation environment
 
-One-click installation of `Kernel` and `OpenWrt` compile common environment configuration.
+One-click install of `Kernel` compile common environment configuration.
 
 ```yaml
 sudo apt-get update -y
 sudo apt-get full-upgrade -y
 sudo apt-get install -y $(curl -fsSL git.io/ubuntu-2004-server)
+sudo apt-get dist-upgrade -y
+sudo apt-get autoremove -y
+```
+
+## Ubuntu-2004-openwrt compilation environment
+
+One-click install of `OpenWrt` compilation environment for Ubuntu 20.04 system.
+
+```yaml
+sudo apt-get update -y
+sudo apt-get full-upgrade -y
+sudo apt-get install -y $(curl -fsSL git.io/ubuntu-2004-openwrt)
+sudo apt-get dist-upgrade -y
+sudo apt-get autoremove -y
+```
+
+## Ubuntu-1804-openwrt compilation environment
+
+One-click install of `OpenWrt` compilation environment for Ubuntu 18.04 system.
+
+```yaml
+sudo apt-get update -y
+sudo apt-get full-upgrade -y
+sudo apt-get install -y $(curl -fsSL git.io/ubuntu-1804-openwrt)
 sudo apt-get dist-upgrade -y
 sudo apt-get autoremove -y
 ```
