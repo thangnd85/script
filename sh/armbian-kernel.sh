@@ -297,14 +297,7 @@ replace_kernel() {
     # 03 for /lib/modules/*
     rm -rf /lib/modules/* 2>/dev/null && sync
     tar -xzf ${P4_PATH}/${build_modules} -C /lib/modules && sync
-        cd /lib/modules/${flippy_version}/
-        rm -f *.ko 2>/dev/null
-        find ./ -type f -name '*.ko' -exec ln -s {} ./ \;
-        sync && sleep 3
-            x=$( ls *.ko -l 2>/dev/null | grep "^l" | wc -l )
-            if [ "${x}" -eq "0" ]; then
-                die "Error *.ko Files not found."
-            fi
+    [[ -d "/lib/modules/${flippy_version}" ]] || die "/lib/modules/${flippy_version} kernel folder is missing."
     echo -e "02.03 Unpack [ ${build_modules} ] complete."
     sleep 3
 
