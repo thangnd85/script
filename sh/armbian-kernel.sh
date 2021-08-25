@@ -30,19 +30,15 @@ replace_kernel() {
     EMMC_NAME=$(lsblk | grep -oE '(mmcblk[0-9])' | sort | uniq)
     P4_PATH="${PWD}"
 
-    # Confirm SOC type from armbian, Openwrt already has this config file by default
-    if [[ ! -f "/etc/flippy-openwrt-release" ]]; then
-        if [[ -z "${INPUTS_SOC}" ]]; then
-            echo  "The supported SOC types are: s905x3  s905x2  s905x  s905d  s912  s922x"
-            echo  "Please enter the SOC type of your device, such as s905x3: "
-            read  AMLOGIC_SOC
-        else
-            AMLOGIC_SOC="${INPUTS_SOC}"
-        fi
-        echo -e "SOC: ${AMLOGIC_SOC}"
-        echo "SOC='${AMLOGIC_SOC}'" > /etc/flippy-openwrt-release 2>/dev/null
-        sync
+    if [[ -z "${INPUTS_SOC}" ]]; then
+        echo  "The supported SOC types are: s905x3  s905x2  s905x  s905d  s912  s922x"
+        echo  "Please enter the SOC type of your device, such as s905x3: "
+        read  AMLOGIC_SOC
+        SOC="${AMLOGIC_SOC}"
+    else
+        SOC="${INPUTS_SOC}"
     fi
+    echo -e "SOC: ${SOC}"
 
     # Download 3 kernel files
     if  [ $( ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l ) -ne 3 ]; then
@@ -166,11 +162,7 @@ replace_kernel() {
     # Check version consistency
     if [ "${V510}" -lt "${K510}" ]; then
         echo -e "Update to kernel 5.10 or higher and install U-BOOT."
-        if [ -f "/etc/flippy-openwrt-release" ]; then
-            # U-BOOT adaptation
-            source /etc/flippy-openwrt-release 2>/dev/null
-            SOC=${SOC}
-            [ -n "${SOC}" ] || die "Unknown SOC, unable to update."
+        if [ -n "${SOC}" ]; then
             case ${SOC} in
                 s905x3) UBOOT_OVERLOAD="u-boot-x96maxplus.bin"
                         MAINLINE_UBOOT="/lib/u-boot/x96maxplus-u-boot.bin.sd.bin" ;;
@@ -226,7 +218,7 @@ replace_kernel() {
                 fi
             fi
         else
-            die "The /etc/flippy-openwrt-release file is missing and cannot be update."
+            die "Unknown SOC, unable to update."
         fi
 
         # Copy u-boot.ext and u-boot.emmc
