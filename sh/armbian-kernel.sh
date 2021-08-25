@@ -25,7 +25,7 @@ die() {
 
 replace_kernel() {
 
-    echo -e "Start update the openwrt kernel."
+    echo -e "Start update the armbian kernel."
     # Operation environment check
     EMMC_NAME=$(lsblk | grep -oE '(mmcblk[0-9])' | sort | uniq)
     P4_PATH="${PWD}"
@@ -320,7 +320,7 @@ replace_kernel() {
     sync
     wait
 
-    echo "The update is complete, Will start automatically, please refresh later!"
+    echo "Upgrade is complete, it will automatically restart. Please reconnect later."
     sleep 3
     echo 'b' > /proc/sysrq-trigger
     exit 0
