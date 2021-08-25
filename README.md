@@ -10,7 +10,8 @@ Provide the kernel update of the Armbian system provided by Flippy used in the A
 
 ```shell
 # Run as root user (sudo -i)
-bash <(curl -fsSL git.io/armbian-kernel)
+# One-click command: bash <(curl -fsSL git.io/armbian-kernel) <soc> <kernel version>
+bash <(curl -fsSL git.io/armbian-kernel) s905x3 5.13.12
 ```
 
 ## OpenWrt kernel update (For Amlogic box)
