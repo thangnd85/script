@@ -14,6 +14,9 @@
 # Copyright (C) 2020-2021 https://github.com/ophub/amlogic-s9xxx-openwrt
 #==================================================================================================================================
 
+INPUTS_SOC="${1}"
+INPUTS_KERNEL="${2}"
+
 # Encountered a serious error, abort the script execution
 die() {
     echo -e " [Error] ${1}"
@@ -29,19 +32,26 @@ replace_kernel() {
 
     # Confirm SOC type from armbian, Openwrt already has this config file by default
     if [[ ! -f "/etc/flippy-openwrt-release" ]]; then
-        echo  "The supported SOC types are: s905x3  s905x2  s905x  s905d  s912  s922x"
-        echo  "Please enter the SOC type of your device, such as s905x3: "
-        read  AMLOGIC_SOC
+        if [[ -z "${INPUTS_SOC}" ]]; then
+            echo  "The supported SOC types are: s905x3  s905x2  s905x  s905d  s912  s922x"
+            echo  "Please enter the SOC type of your device, such as s905x3: "
+            read  AMLOGIC_SOC
+        else
+            AMLOGIC_SOC="${INPUTS_SOC}"
+        fi
+        echo -e "SOC: ${AMLOGIC_SOC}"
         echo "SOC='${AMLOGIC_SOC}'" > /etc/flippy-openwrt-release 2>/dev/null
         sync
     fi
 
     # Download 3 kernel files
     if  [ $( ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l ) -ne 3 ]; then
-
-        SERVER_KERNEL_URL="https://api.github.com/repos/ophub/flippy-kernel/contents/library"
-        echo  "Please enter the kernel version number, such as 5.13.2: "
-        read  KERNEL_NUM
+        if [[ -z "${INPUTS_KERNEL}" ]]; then
+            echo  "Please enter the kernel version number, such as 5.13.2: "
+            read  KERNEL_NUM
+        else
+            KERNEL_NUM="${INPUTS_KERNEL}"
+        fi
         echo -e "Kernel version: ${KERNEL_NUM}"
         echo -e "Start downloading the kernel from github.com ..."
 
@@ -50,11 +60,12 @@ replace_kernel() {
         sync
 
         # Download boot file
+        SERVER_KERNEL_URL="https://api.github.com/repos/ophub/flippy-kernel/contents/library"
         SERVER_KERNEL_BOOT="$(curl -s "${SERVER_KERNEL_URL}/${KERNEL_NUM}" | grep "download_url" | grep -o "https.*/boot-.*.tar.gz" | head -n 1)"
         SERVER_KERNEL_BOOT_NAME="${SERVER_KERNEL_BOOT##*/}"
         SERVER_KERNEL_BOOT_NAME="${SERVER_KERNEL_BOOT_NAME//%2B/+}"
         wget -c "${SERVER_KERNEL_BOOT}" -O "${P4_PATH}/${SERVER_KERNEL_BOOT_NAME}" >/dev/null 2>&1 && sync
-        if [[ "$?" -eq "0" ]]; then
+        if [[ "$?" -eq "0" && -s "${P4_PATH}/${SERVER_KERNEL_BOOT_NAME}" ]]; then
             echo -e "01.01 The boot file download complete."
         else
             die "01.01 The boot file failed to download."
@@ -65,7 +76,7 @@ replace_kernel() {
         SERVER_KERNEL_DTB_NAME="${SERVER_KERNEL_DTB##*/}"
         SERVER_KERNEL_DTB_NAME="${SERVER_KERNEL_DTB_NAME//%2B/+}"
         wget -c "${SERVER_KERNEL_DTB}" -O "${P4_PATH}/${SERVER_KERNEL_DTB_NAME}" >/dev/null 2>&1 && sync
-        if [[ "$?" -eq "0" ]]; then
+        if [[ "$?" -eq "0" && -s "${P4_PATH}/${SERVER_KERNEL_DTB_NAME}" ]]; then
             echo -e "01.02 The dtb file download complete."
         else
             die "01.02 The dtb file failed to download."
@@ -76,7 +87,7 @@ replace_kernel() {
         SERVER_KERNEL_MODULES_NAME="${SERVER_KERNEL_MODULES##*/}"
         SERVER_KERNEL_MODULES_NAME="${SERVER_KERNEL_MODULES_NAME//%2B/+}"
         wget -c "${SERVER_KERNEL_MODULES}" -O "${P4_PATH}/${SERVER_KERNEL_MODULES_NAME}" >/dev/null 2>&1 && sync
-        if [[ "$?" -eq "0" ]]; then
+        if [[ "$?" -eq "0" && -s "${P4_PATH}/${SERVER_KERNEL_MODULES_NAME}" ]]; then
             echo -e "01.03 The modules file download complete."
         else
             die "01.03 The modules file failed to download."
