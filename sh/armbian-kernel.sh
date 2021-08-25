@@ -1,6 +1,7 @@
 #!/bin/bash
 #==================================================================================================================================
-# https://github.com/ophub/script
+# Copyright (C) 2020-2021 Flippy
+# Copyright (C) 2020-2021 https://github.com/ophub/script
 #
 # Description: Armbian kernel update (For Amlogic box)
 # Kernel download: https://github.com/ophub/flippy-kernel/tree/main/library
@@ -9,9 +10,6 @@
 # When there is no U-BOOT file in related directory, the script will auto try to download the file from the server for completion:
 # UBOOT_OVERLOAD: https://github.com/ophub/amlogic-s9xxx-openwrt/tree/main/amlogic-s9xxx/amlogic-u-boot"
 # MAINLINE_UBOOT: https://github.com/ophub/amlogic-s9xxx-openwrt/tree/main/amlogic-s9xxx/common-files/files/lib/u-boot
-#
-# Copyright (C) 2020-2021 Flippy
-# Copyright (C) 2020-2021 https://github.com/ophub/amlogic-s9xxx-openwrt
 #==================================================================================================================================
 
 INPUTS_SOC="${1}"
