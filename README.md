@@ -23,6 +23,13 @@ Use SSH to log in to any directory of OpenWrt system, Or in the `OpenWrt` → `S
 ```yaml
 curl -fsSL git.io/luci-app-amlogic | bash
 ```
+## Website access test
+
+Support: netflix.com / youtube.com / steampowered.com
+
+```yaml
+bash <(curl -fsSL https://git.io/webtest)
+```
 
 ## Ubuntu-2004-server compilation environment
 
