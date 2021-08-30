@@ -30,7 +30,7 @@ curl -fsSL git.io/luci-app-amlogic | bash
 Support: netflix.com / youtube.com / steampowered.com
 
 ```yaml
-bash <(curl -fsSL https://git.io/webtest)
+bash <(curl -fsSL git.io/webtest)
 ```
 
 ## Ubuntu-2004-server compilation environment
