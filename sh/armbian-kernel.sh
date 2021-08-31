@@ -1,7 +1,7 @@
 #!/bin/bash
 #==================================================================================================================================
-# Copyright (C) 2020-2021 Flippy
-# Copyright (C) 2020-2021 https://github.com/ophub/script
+# Copyright (C) 2020- https://github.com/unifreq/openwrt_packit
+# Copyright (C) 2021- https://github.com/ophub/script
 #
 # Description: Armbian kernel update (For Amlogic box)
 # Kernel download: https://github.com/ophub/flippy-kernel/tree/main/library
@@ -30,7 +30,7 @@ replace_kernel() {
 
     if [[ -z "${INPUTS_SOC}" ]]; then
         echo  "The supported SOC types are: s905x3  s905x2  s905x  s905d  s912  s922x"
-        echo  "Please enter the SOC type of your device, such as s905x3: "
+        echo  "Please enter the SOC type of your device, such as: s905x3"
         read  AMLOGIC_SOC
         SOC="${AMLOGIC_SOC}"
     else
@@ -40,12 +40,28 @@ replace_kernel() {
 
     # Download 3 kernel files
     if  [ $( ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l ) -ne 3 ]; then
+
         if [[ -z "${INPUTS_KERNEL}" ]]; then
-            echo  "Please enter the kernel version number, such as 5.13.2: "
+            # Check the version on the server
+            SERVER_KERNEL_URL="https://api.github.com/repos/ophub/flippy-kernel/contents/library"
+
+            LATEST_VERSION_K4_LATEST=$(curl -s "${SERVER_KERNEL_URL}" | grep "name" | grep -oE "5.4.[0-9]+"  | sed -e "s/5.4.//g" | sort -n | sed -n '$p')
+            LATEST_VERSION_K4="5.4.${LATEST_VERSION_K4_LATEST}"
+
+            LATEST_VERSION_K10_LATEST=$(curl -s "${SERVER_KERNEL_URL}" | grep "name" | grep -oE "5.10.[0-9]+"  | sed -e "s/5.10.//g" | sort -n | sed -n '$p')
+            LATEST_VERSION_K10="5.10.${LATEST_VERSION_K10_LATEST}"
+
+            LATEST_VERSION_K13_LATEST=$(curl -s "${SERVER_KERNEL_URL}" | grep "name" | grep -oE "5.13.[0-9]+"  | sed -e "s/5.13.//g" | sort -n | sed -n '$p')
+            LATEST_VERSION_K13="5.13.${LATEST_VERSION_K13_LATEST}"
+
+            echo  "The latest version on the server is: [ ${LATEST_VERSION_K4} / ${LATEST_VERSION_K10} / ${LATEST_VERSION_K13} ]"
+            echo  "Please enter the kernel version number, such as: ${LATEST_VERSION_K4}"
             read  KERNEL_NUM
+            [ -n "${KERNEL_NUM}" ] || KERNEL_NUM="${LATEST_VERSION_K4}"
         else
             KERNEL_NUM="${INPUTS_KERNEL}"
         fi
+
         echo -e "Kernel version: ${KERNEL_NUM}"
         echo -e "Start downloading the kernel from github.com ..."
 
@@ -306,21 +322,11 @@ replace_kernel() {
 
     rm -f ${P4_PATH}/dtb-amlogic-*.tar.gz ${P4_PATH}/boot-*.tar.gz ${P4_PATH}/modules-*.tar.gz 2>/dev/null
     sync
-
-    sed -i '/KERNEL_VERSION/d' /etc/flippy-openwrt-release 2>/dev/null
-    echo "KERNEL_VERSION='${kernel_version}'" >> /etc/flippy-openwrt-release 2>/dev/null
-
-    sed -i '/K510/d' /etc/flippy-openwrt-release 2>/dev/null
-    echo "K510='${K510}'" >> /etc/flippy-openwrt-release 2>/dev/null
-
-    sed -i "s/ Kernel.*/ Kernel: ${flippy_version}/g" /etc/banner 2>/dev/null
-
-    sync
     wait
 
-    echo "Upgrade is complete, it will automatically restart. Please reconnect later."
+    echo "Successfully updated, automatic restarting..."
     sleep 3
-    echo 'b' > /proc/sysrq-trigger
+    reboot
     exit 0
 }
 
