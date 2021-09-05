@@ -256,7 +256,8 @@ replace_kernel() {
     echo -e "Unpack [ ${flippy_version} ] related files ..."
 
     # 01. for /boot five files
-    rm -f /boot/uInitrd /boot/zImage /boot/config-* /boot/initrd.img-* /boot/System.map-* 2>/dev/null && sync
+    rm -f /boot/config-* /boot/initrd.img-* /boot/System.map-* /boot/uInitrd-* /boot/vmlinuz-* 2>/dev/null && sync
+    rm -f /boot/uInitrd /boot/zImage 2>/dev/null && sync
     tar -xzf ${P4_PATH}/${build_boot} -C /boot && sync
 
     if [[ -f "/boot/uInitrd-${flippy_version}" ]]; then
@@ -267,7 +268,6 @@ replace_kernel() {
             uInitrd_original=$(md5sum /boot/uInitrd-${flippy_version} | awk '{print $1}')
             uInitrd_new=$(md5sum /boot/uInitrd | awk '{print $1}')
             if [ "${uInitrd_original}" = "${uInitrd_new}" ]; then
-                rm -f /boot/uInitrd-${flippy_version} && sync
                 break
             else
                 rm -f /boot/uInitrd && sync
@@ -288,7 +288,6 @@ replace_kernel() {
             vmlinuz_original=$(md5sum /boot/vmlinuz-${flippy_version} | awk '{print $1}')
             vmlinuz_new=$(md5sum /boot/zImage | awk '{print $1}')
             if [ "${vmlinuz_original}" = "${vmlinuz_new}" ]; then
-                rm -f /boot/vmlinuz-${flippy_version} && sync
                 break
             else
                 rm -f /boot/zImage && sync
