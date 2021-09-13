@@ -48,13 +48,10 @@ replace_kernel() {
             LATEST_VERSION_K4_LATEST=$(curl -s "${SERVER_KERNEL_URL}" | grep "name" | grep -oE "5.4.[0-9]+"  | sed -e "s/5.4.//g" | sort -n | sed -n '$p')
             LATEST_VERSION_K4="5.4.${LATEST_VERSION_K4_LATEST}"
 
-            #LATEST_VERSION_K10_LATEST=$(curl -s "${SERVER_KERNEL_URL}" | grep "name" | grep -oE "5.10.[0-9]+"  | sed -e "s/5.10.//g" | sort -n | sed -n '$p')
-            #LATEST_VERSION_K10="5.10.${LATEST_VERSION_K10_LATEST}"
+            LATEST_VERSION_K10_LATEST=$(curl -s "${SERVER_KERNEL_URL}" | grep "name" | grep -oE "5.10.[0-9]+"  | sed -e "s/5.10.//g" | sort -n | sed -n '$p')
+            LATEST_VERSION_K10="5.10.${LATEST_VERSION_K10_LATEST}"
 
-            LATEST_VERSION_K13_LATEST=$(curl -s "${SERVER_KERNEL_URL}" | grep "name" | grep -oE "5.13.[0-9]+"  | sed -e "s/5.13.//g" | sort -n | sed -n '$p')
-            LATEST_VERSION_K13="5.13.${LATEST_VERSION_K13_LATEST}"
-
-            echo  "The latest version on the server is: [ ${LATEST_VERSION_K4} / ${LATEST_VERSION_K13} ]"
+            echo  "The latest version on the server is: [ ${LATEST_VERSION_K4} / ${LATEST_VERSION_K10} ]"
             echo  "Please enter the kernel version number, such as: ${LATEST_VERSION_K4}"
             read  KERNEL_NUM
             [ -n "${KERNEL_NUM}" ] || KERNEL_NUM="${LATEST_VERSION_K4}"
@@ -315,6 +312,7 @@ replace_kernel() {
     # 03 for /lib/modules/*
     rm -rf /lib/modules/* 2>/dev/null && sync
     tar -xzf ${P4_PATH}/${build_modules} -C /lib/modules && sync
+    ( cd /lib/modules/${flippy_version} && echo "build source" | xargs rm -f )
     [[ -d "/lib/modules/${flippy_version}" ]] || die "/lib/modules/${flippy_version} kernel folder is missing."
     echo -e "02.03 Unpack [ ${build_modules} ] complete."
     sleep 3
