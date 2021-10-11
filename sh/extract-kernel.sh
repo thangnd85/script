@@ -21,6 +21,8 @@ die() {
     exit 1
 }
 
+[ $(id -u) = 0 ] || die "please run this script as root: [ sudo ./extract-kernel.sh ]"
+
 echo "Start build kernel for amlogic-s9xxx-openwrt ..."
 
     mkdir -p ${armbian_tmp} ${kernel_tmp} ${dtb_tmp} ${modules_tmp}
