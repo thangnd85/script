@@ -2,7 +2,7 @@
 
 ## Armbian kernel update (For Amlogic box)
 
-Provide the `kernel update` of the Armbian system provided by [flippy](https://github.com/unifreq) used in the `Amlogic s9xxx box`. It also applies in [amlogic-s9xxx-armbian](https://github.com/ophub/amlogic-s9xxx-armbian). Can be directly replaced to any series, such as 5.4 to 5.13. Enter any directory of the Armbian system, such as `cd /root`, and run the command directly. 
+Support `update kernel` of Armbian system of `Amlogic s9xxx boxes` made and shared by [flippy](https://github.com/unifreq). It also applies in [amlogic-s9xxx-armbian](https://github.com/ophub/amlogic-s9xxx-armbian). For example, 5.4, 5.10, 5.14, etc., you can directly update and switch to a different kernel version. Enter any directory of the Armbian system, such as `cd /root`, and run the command directly. 
 - Command: `bash <(curl -fsSL git.io/armbian-kernel) <soc> <kernel_version>`
 
 - The supported `<soc>` types are: `s905x3`, `s905x2`, `s905x`, `s905d`, `s912`, `s922x`.
@@ -13,12 +13,12 @@ Provide the `kernel update` of the Armbian system provided by [flippy](https://g
 
 ```shell
 # E.g: Run as root user (sudo -i)
-bash <(curl -fsSL git.io/armbian-kernel) s905x3 5.13.12
+bash <(curl -fsSL git.io/armbian-kernel) s905x3 5.10.70
 ```
 
 ## OpenWrt kernel update (For Amlogic box)
 
-Provide luci operation support for Amlogic STB. The current functions include `install OpenWrt to EMMC`, `Manually Upload Updates / Download Updates Online to update the OpenWrt firmware or kernel`, `Backup / Restore firmware config` and `Custom firmware / kernel download site`, etc.
+From [luci-app-amlogic](https://github.com/ophub/luci-app-amlogic). Supports management of Amlogic s9xxx, Allwinner (V-Plus Cloud), and Rockchip (BeikeYun, Chainedbox L1 Pro) boxes. The current functions include `install OpenWrt to EMMC`, `Manually Upload Updates / Download Updates Online to update the OpenWrt firmware or kernel`, `Backup / Restore firmware config`, `Snapshot management` and `Custom firmware / kernel download site`, etc.
 
 Use SSH to log in to any directory of OpenWrt system, Or in the `OpenWrt` → `System menu` → `TTYD terminal`, Run the onekey install command to automatically download and install this plugin. After the installation is complete, you can find the `Amlogic Service` plugin under the `System menu` of `OpenWrt`.
 
