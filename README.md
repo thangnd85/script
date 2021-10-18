@@ -1,11 +1,11 @@
 # Some script
 
-## Armbian kernel update (For Amlogic box)
+## Armbian kernel update (For Amlogic s9xxx, Allwinner, Rockchip)
 
-Support `update kernel` of Armbian system of `Amlogic s9xxx boxes` made and shared by [flippy](https://github.com/unifreq). It also applies in [amlogic-s9xxx-armbian](https://github.com/ophub/amlogic-s9xxx-armbian). For example, 5.4, 5.10, 5.14, etc., you can directly update and switch to a different kernel version. Enter any directory of the Armbian system, such as `cd /root`, and run the command directly. 
+Support `update kernel` of Armbian system of made and shared by [flippy](https://github.com/unifreq). It also applies in [amlogic-s9xxx-armbian](https://github.com/ophub/amlogic-s9xxx-armbian). For example, 5.4, 5.10, 5.14, etc., you can directly update and switch to a different kernel version. Enter any directory of the Armbian system, such as `cd /root`, and run the command directly. 
 - Command: `bash <(curl -fsSL git.io/armbian-kernel) <soc> <kernel_version>`
 
-- The supported `<soc>` types are: `s905x3`, `s905x2`, `s905x`, `s905d`, `s912`, `s922x`.
+- The supported `<soc>` types are: `s905x3`, `s905x2`, `s905x`, `s905d`, `s912`, `s922x`, `l1pro`, `beikeyun`, `vplus`.
 
 - Support updated <[kernel_version](https://github.com/ophub/flippy-kernel/tree/main/library)>.
 
