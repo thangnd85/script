@@ -52,7 +52,7 @@ EMMC_NAME=$(lsblk -l -o NAME | grep -oE '(mmcblk[0-9]?boot0)' | sed "s/boot0//g"
 P4_PATH="${PWD}"
 
 if [[ -z "${INPUTS_SOC}" ]]; then
-    echo  "The supported SOC types are: s905x3  s905x2  s905x  s905d  s912  s922x"
+    echo  "The supported SOC types are: s905x3  s905x2  s905x  s905d  s912  s922x  l1pro  beikeyun  vplus"
     echo  "Please enter the SOC type of your device, such as: s905x3"
     read  AMLOGIC_SOC
     SOC="${AMLOGIC_SOC}"
