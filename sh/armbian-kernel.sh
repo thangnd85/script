@@ -1,5 +1,5 @@
 #!/bin/bash
-#==================================================================================================================================
+#=======================================================================================================================
 # Copyright (C) 2020- https://github.com/unifreq/openwrt_packit
 # Copyright (C) 2021- https://github.com/ophub/script
 #
@@ -10,7 +10,12 @@
 # When there is no U-BOOT file in related directory, the script will auto try to download the file from the server:
 # UBOOT_OVERLOAD: https://github.com/ophub/luci-app-amlogic/tree/main/depends/meson_btld/without_fip
 # MAINLINE_UBOOT: https://github.com/ophub/luci-app-amlogic/tree/main/depends/meson_btld/with_fip
-#==================================================================================================================================
+#=======================================================================================================================
+# Update kernel command:
+# armbian-kernel.sh s905x3 5.10.50
+#
+# When the kernel version is upgraded from 5.10 or lower to 5.10 or higher, Can choose to install the MAINLINE_UBOOT.
+# armbian-kernel.sh s905x3 5.10.50 yes
 
 # Receive one-key command related parameters
 INPUTS_SOC="${1}"
@@ -48,11 +53,25 @@ fi
 echo -e "Current device: ${MYDEVICE_NAME} [${MYDTB_FILE}]"
 sleep 3
 
-EMMC_NAME=$(lsblk -l -o NAME | grep -oE '(mmcblk[0-9]?boot0)' | sed "s/boot0//g")
+# Find the partition where root is located
+ROOT_PTNAME=$(df / | tail -n1 | awk '{print $1}' | awk -F '/' '{print $3}')
+if [ "${ROOT_PTNAME}" == "" ];then
+    echo "Cannot find the partition corresponding to the root file system!"
+    exit 1
+fi
+
+# Find the disk where the partition is located, only supports mmcblk?p? sd?? hd?? vd?? and other formats
+case ${ROOT_PTNAME} in
+       mmcblk?p[1-4]) EMMC_NAME="$(echo ${ROOT_PTNAME} | awk '{print substr($1, 1, length($1)-2)}')" ;;
+    [hsv]d[a-z][1-4]) EMMC_NAME="$(echo ${ROOT_PTNAME} | awk '{print substr($1, 1, length($1)-1)}')" ;;
+                   *) echo "Unable to recognize the disk type of ${ROOT_PTNAME}!"
+                      exit 1
+                      ;;
+esac
 P4_PATH="${PWD}"
 
 if [[ -z "${INPUTS_SOC}" ]]; then
-    echo  "The supported SOC types are: s905x3  s905x2  s905x  s905d  s912  s922x  l1pro  beikeyun  vplus"
+    echo  "The supported SOC types are: s905x3, s905x2, s905x, s905d, s912, s922x, l1pro, beikeyun, vplus"
     echo  "Please enter the SOC type of your device, such as: s905x3"
     read  AMLOGIC_SOC
     SOC="${AMLOGIC_SOC}"
