@@ -47,6 +47,16 @@ Supports OpenWrt firmware packaged by [flippy](https://github.com/unifreq/openwr
 
 The OpenWrt firmware packaged by `flippy` will automatically complete the partition after the TF/USB starts after version 66, This script is applicable to the previous version. The OpenWrt firmware of `ophub` does not automatically partition by default when TF/USB is started. If you need to use it on TF/USB, you need to execute the partition command manually.
 
+## Create swap for openwrt system
+
+Supports OpenWrt firmware packaged by [flippy](https://github.com/unifreq/openwrt_packit) and [ophub](https://github.com/ophub/amlogic-s9xxx-openwrt) related scripts. If you feel that the memory of the current box is not enough when you are using applications with a large memory footprint such as `docker`, you can create a `swap` virtual memory partition, Change the disk space of `/mnt/[mmcblk?p|sd?]4` A certain capacity is virtualized into memory for use. The unit of the input parameter of the following command is `GB`, and the default is `1`.
+
+Log in to the default IP: 192.168.1.1 →  `Login in to openwrt` → `system menu` → `TTYD terminal` → input command
+
+```yaml
+curl -fsSL git.io/create_openwrt_swap | bash -s 1
+```
+
 ## Website access test
 
 Support: netflix.com / youtube.com / steampowered.com
