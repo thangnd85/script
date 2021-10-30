@@ -59,7 +59,7 @@ create_new_swap() {
     echo -e "The swap size is: [ ${1} ] GB, Please wait..."
     dd if=/dev/zero of=${SWAP_PATH}/swapfile bs=1024 count=${dd_count} conv=fsync && sync
     chmod 600 ${SWAP_PATH}/swapfile
-    mkswap -L swap ${SWAP_PATH}/swapfile
+    mkswap -L SWAP ${SWAP_PATH}/swapfile
     swapon ${SWAP_PATH}/swapfile
     sync
     # Add swap to the mount point
@@ -80,4 +80,6 @@ if [ "${current_swap}" -gt "0" ]; then
 else
     create_new_swap ${swap_gb}
 fi
+sync
+exit 0
 
