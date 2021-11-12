@@ -14,16 +14,36 @@
 # Update kernel command:
 # armbian-kernel.sh s905x3 5.10.50
 #
+# Choose a different kernel branch
+# armbian-kernel.sh s905x3 5.10.50 stable
+#
 # When the kernel version is upgraded from 5.10 or lower to 5.10 or higher, Can choose to install the MAINLINE_UBOOT.
-# armbian-kernel.sh s905x3 5.10.50 yes
+# armbian-kernel.sh s905x3 5.10.50 stable yes
 
 # Receive one-key command related parameters
 INPUTS_SOC="${1}"
 INPUTS_KERNEL="${2}"
-AUTO_MAINLINE_UBOOT="${3}"
+
+# Specify version branch, such as: stable
+ARR_BRANCH=("stable" "beta")
+if [[ -n "${3}" && -n "$(echo "${ARR_BRANCH[@]}" | grep -w "${3}")" ]]; then
+    version_branch="${3}"
+else
+    version_branch="stable"
+fi
+
+# Specify whether to brush into the mainline u-boot, such as: yes
+if [[ "${4}" == "no" ]]; then
+    AUTO_MAINLINE_UBOOT="no"
+else
+    AUTO_MAINLINE_UBOOT="yes"
+fi
 
 # The UBOOT_OVERLOAD and MAINLINE_UBOOT files download path
 GITHUB_RAW="https://raw.githubusercontent.com/ophub/luci-app-amlogic/main/depends/meson_btld"
+
+# Check the version on the server
+SERVER_KERNEL_URL="https://api.github.com/repos/ophub/kernel/contents/pub/${version_branch}"
 
 # Encountered a serious error, abort the script execution
 die() {
@@ -84,9 +104,6 @@ echo -e "SOC: ${SOC}"
 if  [ $( ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l ) -ne 3 ]; then
 
     if [[ -z "${INPUTS_KERNEL}" ]]; then
-        # Check the version on the server
-        SERVER_KERNEL_URL="https://api.github.com/repos/ophub/flippy-kernel/contents/library"
-
         LATEST_VERSION_K4_LATEST=$(curl -s "${SERVER_KERNEL_URL}" | grep "name" | grep -oE "5.4.[0-9]+"  | sed -e "s/5.4.//g" | sort -n | sed -n '$p')
         LATEST_VERSION_K4="5.4.${LATEST_VERSION_K4_LATEST}"
 
@@ -109,7 +126,6 @@ if  [ $( ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l ) -ne 3 ]; th
     sync
 
     # Download boot file
-    SERVER_KERNEL_URL="https://api.github.com/repos/ophub/flippy-kernel/contents/library"
     SERVER_KERNEL_BOOT="$(curl -s "${SERVER_KERNEL_URL}/${KERNEL_NUM}" | grep "download_url" | grep -o "https.*/boot-.*.tar.gz" | head -n 1)"
     SERVER_KERNEL_BOOT_NAME="${SERVER_KERNEL_BOOT##*/}"
     SERVER_KERNEL_BOOT_NAME="${SERVER_KERNEL_BOOT_NAME//%2B/+}"
