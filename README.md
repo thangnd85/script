@@ -8,7 +8,7 @@ Support `update kernel` of Armbian system of made and shared by [flippy](https:/
 
 - The supported `<soc>` types are: `s905x3`, `s905x2`, `s905x`, `s905d`, `s912`, `s922x`, `l1pro`, `beikeyun`, `vplus`.
 
-- Support updated <[kernel_version](https://github.com/ophub/flippy-kernel/tree/main/library)>.
+- Support updated <[kernel_version](https://github.com/ophub/kernel/tree/main/pub/stable)>.
 
 - When the one-key command you enter is missing the `<soc>` or `<kernel_version>`, it will be asked, please enter it according to the prompts.
 
