@@ -67,12 +67,24 @@ bash <(curl -fsSL git.io/webtest)
 
 ## Ubuntu-2004-server compilation environment
 
-One-click install of `Kernel` compile common environment configuration.
+One-click install of `Armbian` compile common environment configuration.
 
 ```yaml
 sudo apt-get update -y
 sudo apt-get full-upgrade -y
 sudo apt-get install -y $(curl -fsSL git.io/ubuntu-2004-server)
+sudo apt-get dist-upgrade -y
+sudo apt-get autoremove -y
+```
+
+## Armbian-kernel-server compilation environment
+
+One-click install of `Kernel` compile common environment configuration.
+
+```yaml
+sudo apt-get update -y
+sudo apt-get full-upgrade -y
+sudo apt-get install -y $(curl -fsSL git.io/armbian-kernel-server)
 sudo apt-get dist-upgrade -y
 sudo apt-get autoremove -y
 ```
