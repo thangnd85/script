@@ -12,13 +12,13 @@
 # MAINLINE_UBOOT: https://github.com/ophub/luci-app-amlogic/tree/main/depends/meson_btld/with_fip
 #=======================================================================================================================
 # Update kernel command:
-# armbian-kernel.sh s905x3 5.10.50
+# armbian-kernel.sh s905x3 5.10.60
 #
 # Choose a different kernel branch
-# armbian-kernel.sh s905x3 5.10.50 stable
+# armbian-kernel.sh s905x3 5.10.60 stable
 #
 # When the kernel version is upgraded from 5.10 or lower to 5.10 or higher, Can choose to install the MAINLINE_UBOOT.
-# armbian-kernel.sh s905x3 5.10.50 stable yes
+# armbian-kernel.sh s905x3 5.10.60 stable yes
 
 # Receive one-key command related parameters
 INPUTS_SOC="${1}"
@@ -75,25 +75,30 @@ sleep 3
 
 # Find the partition where root is located
 ROOT_PTNAME=$(df / | tail -n1 | awk '{print $1}' | awk -F '/' '{print $3}')
-if [ "${ROOT_PTNAME}" == "" ];then
+if [ "${ROOT_PTNAME}" == "" ]; then
     echo "Cannot find the partition corresponding to the root file system!"
     exit 1
 fi
 
 # Find the disk where the partition is located, only supports mmcblk?p? sd?? hd?? vd?? and other formats
 case ${ROOT_PTNAME} in
-       mmcblk?p[1-4]) EMMC_NAME="$(echo ${ROOT_PTNAME} | awk '{print substr($1, 1, length($1)-2)}')" ;;
-    [hsv]d[a-z][1-4]) EMMC_NAME="$(echo ${ROOT_PTNAME} | awk '{print substr($1, 1, length($1)-1)}')" ;;
-                   *) echo "Unable to recognize the disk type of ${ROOT_PTNAME}!"
-                      exit 1
-                      ;;
+mmcblk?p[1-4])
+    EMMC_NAME="$(echo ${ROOT_PTNAME} | awk '{print substr($1, 1, length($1)-2)}')"
+    ;;
+[hsv]d[a-z][1-4])
+    EMMC_NAME="$(echo ${ROOT_PTNAME} | awk '{print substr($1, 1, length($1)-1)}')"
+    ;;
+*)
+    echo "Unable to recognize the disk type of ${ROOT_PTNAME}!"
+    exit 1
+    ;;
 esac
 P4_PATH="${PWD}"
 
 if [[ -z "${INPUTS_SOC}" ]]; then
-    echo  "The supported SOC types are: s905x3, s905x2, s905x, s905d, s912, s922x, l1pro, beikeyun, vplus"
-    echo  "Please enter the SOC type of your device, such as: s905x3"
-    read  AMLOGIC_SOC
+    echo "The supported SOC types are: s905x3, s905x2, s905x, s905d, s912, s922x, l1pro, beikeyun, vplus"
+    echo "Please enter the SOC type of your device, such as: s905x3"
+    read AMLOGIC_SOC
     SOC="${AMLOGIC_SOC}"
 else
     SOC="${INPUTS_SOC}"
@@ -101,18 +106,14 @@ fi
 echo -e "SOC: ${SOC}"
 
 # Download 3 kernel files
-if  [ $( ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l ) -ne 3 ]; then
+if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ne 3 ]; then
 
     if [[ -z "${INPUTS_KERNEL}" ]]; then
-        LATEST_VERSION_K4_LATEST=$(curl -s "${SERVER_KERNEL_URL}" | grep "name" | grep -oE "5.4.[0-9]+"  | sed -e "s/5.4.//g" | sort -n | sed -n '$p')
+        LATEST_VERSION_K4_LATEST=$(curl -s "${SERVER_KERNEL_URL}" | grep "name" | grep -oE "5.4.[0-9]+" | sed -e "s/5.4.//g" | sort -n | sed -n '$p')
         LATEST_VERSION_K4="5.4.${LATEST_VERSION_K4_LATEST}"
 
-        LATEST_VERSION_K10_LATEST=$(curl -s "${SERVER_KERNEL_URL}" | grep "name" | grep -oE "5.10.[0-9]+"  | sed -e "s/5.10.//g" | sort -n | sed -n '$p')
-        LATEST_VERSION_K10="5.10.${LATEST_VERSION_K10_LATEST}"
-
-        echo  "The latest version on the server is: [ ${LATEST_VERSION_K4} / ${LATEST_VERSION_K10} ]"
-        echo  "Please enter the kernel version number, such as: ${LATEST_VERSION_K4}"
-        read  KERNEL_NUM
+        echo "Please enter the kernel version number, such as: ${LATEST_VERSION_K4}"
+        read KERNEL_NUM
         [ -n "${KERNEL_NUM}" ] || KERNEL_NUM="${LATEST_VERSION_K4}"
     else
         KERNEL_NUM="${INPUTS_KERNEL}"
@@ -161,18 +162,18 @@ if  [ $( ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l ) -ne 3 ]; th
     sync
 fi
 
-if  [ $( ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l ) -ge 3 ]; then
+if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ge 3 ]; then
 
-    if  [ $( ls ${P4_PATH}/boot-*.tar.gz -l 2>/dev/null | grep "^-" | wc -l ) -ge 1 ]; then
-        build_boot=$( ls ${P4_PATH}/boot-*.tar.gz | head -n 1 ) && build_boot=${build_boot##*/}
+    if [ $(ls ${P4_PATH}/boot-*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ge 1 ]; then
+        build_boot=$(ls ${P4_PATH}/boot-*.tar.gz | head -n 1) && build_boot=${build_boot##*/}
         echo -e "Update using [ ${build_boot} ] files. Please wait a moment ..."
         flippy_version=${build_boot/boot-/} && flippy_version=${flippy_version/.tar.gz/}
         kernel_version=$(echo ${flippy_version} | grep -oE '^[1-9].[0-9]{1,2}.[0-9]+')
         kernel_vermaj=$(echo ${kernel_version} | grep -oE '^[1-9].[0-9]{1,2}')
         k510_ver=${kernel_vermaj%%.*}
         k510_maj=${kernel_vermaj##*.}
-        if  [ ${k510_ver} -eq "5" ]; then
-            if  [ "${k510_maj}" -ge "10" ]; then
+        if [ ${k510_ver} -eq "5" ]; then
+            if [ "${k510_maj}" -ge "10" ]; then
                 K510=1
             else
                 K510=0
@@ -186,13 +187,13 @@ if  [ $( ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l ) -ge 3 ]; th
         die "Have no boot-*.tar.gz file found in the ${P4_PATH} directory."
     fi
 
-    if  [ -f ${P4_PATH}/dtb-${MYDTB_FILE}-${flippy_version}.tar.gz ]; then
+    if [ -f ${P4_PATH}/dtb-${MYDTB_FILE}-${flippy_version}.tar.gz ]; then
         build_dtb="dtb-${MYDTB_FILE}-${flippy_version}.tar.gz"
     else
         die "Have no dtb-${MYDTB_FILE}-*.tar.gz file found in the ${P4_PATH} directory."
     fi
 
-    if  [ -f ${P4_PATH}/modules-${flippy_version}.tar.gz ]; then
+    if [ -f ${P4_PATH}/modules-${flippy_version}.tar.gz ]; then
         build_modules="modules-${flippy_version}.tar.gz"
     else
         die "Have no modules-*.tar.gz file found in the ${P4_PATH} directory."
@@ -216,8 +217,8 @@ MODULES_OLD=$(ls /lib/modules/ 2>/dev/null)
 VERSION_OLD=$(echo ${MODULES_OLD} | grep -oE '^[1-9].[0-9]{1,2}' 2>/dev/null)
 VERSION_ver=${VERSION_OLD%%.*}
 VERSION_maj=${VERSION_OLD##*.}
-if  [ ${VERSION_ver} -eq "5" ]; then
-    if  [ "${VERSION_maj}" -ge "10" ]; then
+if [ ${VERSION_ver} -eq "5" ]; then
+    if [ "${VERSION_maj}" -ge "10" ]; then
         V510=1
     else
         V510=0
@@ -233,21 +234,35 @@ if [[ "${V510}" -lt "${K510}" && "${MYDTB_FILE}" == "amlogic" ]]; then
     echo -e "Update to kernel 5.10 or higher and install U-BOOT."
     if [ -n "${SOC}" ]; then
         case ${SOC} in
-            s905x3) UBOOT_OVERLOAD="u-boot-x96maxplus.bin"
-                    MAINLINE_UBOOT="x96maxplus-u-boot.bin.sd.bin" ;;
-            s905x2) UBOOT_OVERLOAD="u-boot-x96max.bin"
-                    MAINLINE_UBOOT="x96max-u-boot.bin.sd.bin" ;;
-            s905x)  UBOOT_OVERLOAD="u-boot-p212.bin"
-                    MAINLINE_UBOOT="" ;;
-            s905w)  UBOOT_OVERLOAD="u-boot-s905x-s912.bin"
-                    MAINLINE_UBOOT="" ;;
-            s905d)  UBOOT_OVERLOAD="u-boot-n1.bin"
-                    MAINLINE_UBOOT="" ;;
-            s912)   UBOOT_OVERLOAD="u-boot-zyxq.bin"
-                    MAINLINE_UBOOT="" ;;
-            s922x)  UBOOT_OVERLOAD="u-boot-gtkingpro.bin"
-                    MAINLINE_UBOOT="gtkingpro-u-boot.bin.sd.bin" ;;
-            *)      die "Unknown SOC, unable to update to kernel 5.10 and above." ;;
+        s905x3)
+            UBOOT_OVERLOAD="u-boot-x96maxplus.bin"
+            MAINLINE_UBOOT="x96maxplus-u-boot.bin.sd.bin"
+            ;;
+        s905x2)
+            UBOOT_OVERLOAD="u-boot-x96max.bin"
+            MAINLINE_UBOOT="x96max-u-boot.bin.sd.bin"
+            ;;
+        s905x)
+            UBOOT_OVERLOAD="u-boot-p212.bin"
+            MAINLINE_UBOOT=""
+            ;;
+        s905w)
+            UBOOT_OVERLOAD="u-boot-s905x-s912.bin"
+            MAINLINE_UBOOT=""
+            ;;
+        s905d)
+            UBOOT_OVERLOAD="u-boot-n1.bin"
+            MAINLINE_UBOOT=""
+            ;;
+        s912)
+            UBOOT_OVERLOAD="u-boot-zyxq.bin"
+            MAINLINE_UBOOT=""
+            ;;
+        s922x)
+            UBOOT_OVERLOAD="u-boot-gtkingpro.bin"
+            MAINLINE_UBOOT="gtkingpro-u-boot.bin.sd.bin"
+            ;;
+        *) die "Unknown SOC, unable to update to kernel 5.10 and above." ;;
         esac
 
         # Check ${UBOOT_OVERLOAD}
@@ -366,14 +381,14 @@ if [[ "${MYDTB_FILE}" == "rockchip" ]]; then
     ln -sf /boot/dtb-${flippy_version} /boot/dtb
 fi
 tar -xzf ${P4_PATH}/${build_dtb} -C /boot/dtb/${MYDTB_FILE} && sync
-[ "$( ls /boot/dtb/${MYDTB_FILE} -l 2>/dev/null | grep "^-" | wc -l )" -ge "1" ] || die "/boot/dtb/${MYDTB_FILE} file is missing."
+[ "$(ls /boot/dtb/${MYDTB_FILE} -l 2>/dev/null | grep "^-" | wc -l)" -ge "1" ] || die "/boot/dtb/${MYDTB_FILE} file is missing."
 echo -e "02.02 Unpack [ ${build_dtb} ] complete."
 sleep 3
 
 # 03 for /lib/modules/*
 rm -rf /lib/modules/* 2>/dev/null && sync
 tar -xzf ${P4_PATH}/${build_modules} -C /lib/modules && sync
-( cd /lib/modules/${flippy_version} && echo "build source" | xargs rm -f )
+(cd /lib/modules/${flippy_version} && echo "build source" | xargs rm -f)
 [[ -d "/lib/modules/${flippy_version}" ]] || die "/lib/modules/${flippy_version} kernel folder is missing."
 echo -e "02.03 Unpack [ ${build_modules} ] complete."
 sleep 3
@@ -386,5 +401,3 @@ echo "Successfully updated, automatic restarting..."
 sleep 3
 reboot
 exit 0
-
-

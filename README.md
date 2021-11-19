@@ -2,7 +2,7 @@
 
 ## Armbian kernel update (For Amlogic s9xxx, Allwinner, Rockchip)
 
-Support `update kernel` of Armbian system of made and shared by [flippy](https://github.com/unifreq). It also applies in [amlogic-s9xxx-armbian](https://github.com/ophub/amlogic-s9xxx-armbian). For example, 5.4, 5.10, 5.14, etc., you can directly update and switch to a different kernel version. Enter any directory of the Armbian system, such as `cd /root`, and run the command directly. 
+Support `update kernel` of Armbian system of made and shared by [flippy](https://github.com/unifreq). It also applies in [amlogic-s9xxx-armbian](https://github.com/ophub/amlogic-s9xxx-armbian). For example, 5.4, 5.10, 5.15, etc., you can directly update and switch to a different kernel version. Enter any directory of the Armbian system, such as `cd /root`, and run the command directly.
 
 - Command: `bash <(curl -fsSL git.io/armbian-kernel) <soc> <kernel_version>`
 
@@ -14,7 +14,7 @@ Support `update kernel` of Armbian system of made and shared by [flippy](https:/
 
 ```shell
 # E.g: Run as root user (sudo -i)
-bash <(curl -fsSL git.io/armbian-kernel) s905x3 5.10.70
+bash <(curl -fsSL git.io/armbian-kernel) s905x3 5.10.80
 ```
 
 ## Use Armbian in TF/USB
