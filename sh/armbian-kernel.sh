@@ -123,7 +123,7 @@ if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ne 3 ]; then
     echo -e "Start downloading the kernel from github.com ..."
 
     # Delete tmp files
-    rm -f ${P4_PATH}/dtb-${MYDTB_FILE}-*.tar.gz ${P4_PATH}/boot-*.tar.gz ${P4_PATH}/modules-*.tar.gz 2>/dev/null
+    rm -f ${P4_PATH}/dtb-${MYDTB_FILE}-*.tar.gz ${P4_PATH}/boot-*.tar.gz ${P4_PATH}/modules-*.tar.gz ${P4_PATH}/header-*.tar.gz 2>/dev/null
     sync
 
     # Download boot file
@@ -159,6 +159,19 @@ if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ne 3 ]; then
         die "01.03 The modules file failed to download."
     fi
 
+    # Download header file
+    SERVER_KERNEL_HEADER="$(curl -s "${SERVER_KERNEL_URL}/${KERNEL_NUM}" | grep "download_url" | grep -o "https.*/header-.*.tar.gz" | head -n 1)"
+    if [ -n "${SERVER_KERNEL_HEADER}" ]; then
+        SERVER_KERNEL_HEADER_NAME="${SERVER_KERNEL_HEADER##*/}"
+        SERVER_KERNEL_HEADER_NAME="${SERVER_KERNEL_HEADER_NAME//%2B/+}"
+        wget -c "${SERVER_KERNEL_HEADER}" -O "${P4_PATH}/${SERVER_KERNEL_HEADER_NAME}" >/dev/null 2>&1 && sync
+        if [[ "$?" -eq "0" && -s "${P4_PATH}/${SERVER_KERNEL_HEADER_NAME}" ]]; then
+            echo -e "01.04 The header file download complete."
+        else
+            die "01.04 The header file failed to download."
+        fi
+    fi
+
     sync
 fi
 
@@ -166,7 +179,6 @@ if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ge 3 ]; then
 
     if [ $(ls ${P4_PATH}/boot-*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ge 1 ]; then
         build_boot=$(ls ${P4_PATH}/boot-*.tar.gz | head -n 1) && build_boot=${build_boot##*/}
-        echo -e "Update using [ ${build_boot} ] files. Please wait a moment ..."
         flippy_version=${build_boot/boot-/} && flippy_version=${flippy_version/.tar.gz/}
         kernel_version=$(echo ${flippy_version} | grep -oE '^[1-9].[0-9]{1,2}.[0-9]+')
         kernel_vermaj=$(echo ${kernel_version} | grep -oE '^[1-9].[0-9]{1,2}')
@@ -199,15 +211,13 @@ if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ge 3 ]; then
         die "Have no modules-*.tar.gz file found in the ${P4_PATH} directory."
     fi
 
-    echo -e " \
-    Try to using this files to update the kernel: \n \
-    boot: ${build_boot} \n \
-    dtb: ${build_dtb} \n \
-    modules: ${build_modules} \n \
-    flippy_version: ${flippy_version} \n \
-    kernel_version: ${kernel_version} \n \
-    K510: ${K510}"
+    if [ -f ${P4_PATH}/header-${flippy_version}.tar.gz ]; then
+        build_header="header-${flippy_version}.tar.gz"
+    else
+        build_header=""
+    fi
 
+    echo -e "flippy_version: ${flippy_version} "
 else
     echo -e "Please upload the kernel files to [ ${P4_PATH} ], then run [ $0 ] again."
     exit 1
@@ -393,7 +403,14 @@ tar -xzf ${P4_PATH}/${build_modules} -C /lib/modules && sync
 echo -e "02.03 Unpack [ ${build_modules} ] complete."
 sleep 3
 
-rm -f ${P4_PATH}/dtb-${MYDTB_FILE}-*.tar.gz ${P4_PATH}/boot-*.tar.gz ${P4_PATH}/modules-*.tar.gz 2>/dev/null
+# 04 for /usr/include/*
+if [[ -n "${build_header}" && -f "${P4_PATH}/${build_header}" ]]; then
+    tar -xzf ${P4_PATH}/${build_header} -C /usr && sync
+    echo -e "02.04 Unpack [ ${build_header} ] complete."
+    sleep 3
+fi
+
+rm -f ${P4_PATH}/dtb-${MYDTB_FILE}-*.tar.gz ${P4_PATH}/boot-*.tar.gz ${P4_PATH}/modules-*.tar.gz ${P4_PATH}/header-*.tar.gz 2>/dev/null
 sync
 wait
 
