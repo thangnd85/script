@@ -404,9 +404,10 @@ tar -xzf ${P4_PATH}/${build_modules} -C /lib/modules && sync
 echo -e "02.03 Unpack [ ${build_modules} ] complete."
 sleep 3
 
-# 04 for /usr/include/*
+# 04 for /usr/local/include/*
 if [[ -n "${build_header}" && -f "${P4_PATH}/${build_header}" ]]; then
-    tar -xzf ${P4_PATH}/${build_header} -C /usr && sync
+    rm -rf /use/local/include/* 2>/dev/null && sync
+    tar -xzf ${P4_PATH}/${build_header} -C /usr/local && sync
     echo -e "02.04 Unpack [ ${build_header} ] complete."
     sleep 3
 fi

@@ -17,6 +17,8 @@ Support `update kernel` of Armbian system of made and shared by [flippy](https:/
 bash <(curl -fsSL git.io/armbian-kernel) s905x3 5.10.80
 ```
 
+Tips: The headers file is installed in the `/use/local/include` directory.
+
 ## Use Armbian in TF/USB
 
 Supports Armbian system of made and shared by [flippy](https://github.com/unifreq) and [ophub](https://github.com/ophub/amlogic-s9xxx-armbian) related scripts. To activate the remaining space of TF/USB, please login in to armbian → input command:
