@@ -20,6 +20,8 @@
 # When the kernel version is upgraded from 5.10 or lower to 5.10 or higher, Can choose to install the MAINLINE_UBOOT.
 # armbian-kernel.sh s905x3 5.10.60 stable yes
 
+echo -e "Ready to update, please wait..."
+
 # Receive one-key command related parameters
 INPUTS_SOC="${1}"
 INPUTS_KERNEL="${2}"
@@ -50,8 +52,6 @@ die() {
     echo -e " [Error] ${1}"
     exit 1
 }
-
-echo -e "Start update the armbian kernel."
 
 # Current device model
 MYDEVICE_NAME=$(cat /proc/device-tree/model | tr -d '\000')
@@ -114,20 +114,22 @@ if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ne 3 ]; then
 
         echo "Please enter the kernel version number, such as: ${LATEST_VERSION_K4}"
         read KERNEL_NUM
-        [ -n "${KERNEL_NUM}" ] || KERNEL_NUM="${LATEST_VERSION_K4}"
-    else
-        KERNEL_NUM="${INPUTS_KERNEL}"
+        if [ -n "${KERNEL_NUM}" ]; then
+            INPUTS_KERNEL="${KERNEL_NUM}"
+        else
+            INPUTS_KERNEL="${LATEST_VERSION_K4}"
+        fi
     fi
 
-    echo -e "Kernel version: ${KERNEL_NUM}"
+    echo -e "Kernel version: ${INPUTS_KERNEL}"
     echo -e "Start downloading the kernel from github.com ..."
 
     # Delete tmp files
-    rm -f ${P4_PATH}/dtb-${MYDTB_FILE}-*.tar.gz ${P4_PATH}/boot-*.tar.gz ${P4_PATH}/modules-*.tar.gz ${P4_PATH}/header-*.tar.gz 2>/dev/null
+    rm -f ${P4_PATH}/*${INPUTS_KERNEL}*.tar.gz 2>/dev/null
     sync
 
     # Download boot file
-    SERVER_KERNEL_BOOT="$(curl -s "${SERVER_KERNEL_URL}/${KERNEL_NUM}" | grep "download_url" | grep -o "https.*/boot-.*.tar.gz" | head -n 1)"
+    SERVER_KERNEL_BOOT="$(curl -s "${SERVER_KERNEL_URL}/${INPUTS_KERNEL}" | grep "download_url" | grep -o "https.*/boot-.*.tar.gz" | head -n 1)"
     SERVER_KERNEL_BOOT_NAME="${SERVER_KERNEL_BOOT##*/}"
     SERVER_KERNEL_BOOT_NAME="${SERVER_KERNEL_BOOT_NAME//%2B/+}"
     wget -c "${SERVER_KERNEL_BOOT}" -O "${P4_PATH}/${SERVER_KERNEL_BOOT_NAME}" >/dev/null 2>&1 && sync
@@ -138,7 +140,7 @@ if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ne 3 ]; then
     fi
 
     # Download dtb file
-    SERVER_KERNEL_DTB="$(curl -s "${SERVER_KERNEL_URL}/${KERNEL_NUM}" | grep "download_url" | grep -o "https.*/dtb-${MYDTB_FILE}-.*.tar.gz" | head -n 1)"
+    SERVER_KERNEL_DTB="$(curl -s "${SERVER_KERNEL_URL}/${INPUTS_KERNEL}" | grep "download_url" | grep -o "https.*/dtb-${MYDTB_FILE}-.*.tar.gz" | head -n 1)"
     SERVER_KERNEL_DTB_NAME="${SERVER_KERNEL_DTB##*/}"
     SERVER_KERNEL_DTB_NAME="${SERVER_KERNEL_DTB_NAME//%2B/+}"
     wget -c "${SERVER_KERNEL_DTB}" -O "${P4_PATH}/${SERVER_KERNEL_DTB_NAME}" >/dev/null 2>&1 && sync
@@ -149,7 +151,7 @@ if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ne 3 ]; then
     fi
 
     # Download modules file
-    SERVER_KERNEL_MODULES="$(curl -s "${SERVER_KERNEL_URL}/${KERNEL_NUM}" | grep "download_url" | grep -o "https.*/modules-.*.tar.gz" | head -n 1)"
+    SERVER_KERNEL_MODULES="$(curl -s "${SERVER_KERNEL_URL}/${INPUTS_KERNEL}" | grep "download_url" | grep -o "https.*/modules-.*.tar.gz" | head -n 1)"
     SERVER_KERNEL_MODULES_NAME="${SERVER_KERNEL_MODULES##*/}"
     SERVER_KERNEL_MODULES_NAME="${SERVER_KERNEL_MODULES_NAME//%2B/+}"
     wget -c "${SERVER_KERNEL_MODULES}" -O "${P4_PATH}/${SERVER_KERNEL_MODULES_NAME}" >/dev/null 2>&1 && sync
@@ -160,7 +162,7 @@ if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ne 3 ]; then
     fi
 
     # Download header file
-    SERVER_KERNEL_HEADER="$(curl -s "${SERVER_KERNEL_URL}/${KERNEL_NUM}" | grep "download_url" | grep -o "https.*/header-.*.tar.gz" | head -n 1)"
+    SERVER_KERNEL_HEADER="$(curl -s "${SERVER_KERNEL_URL}/${INPUTS_KERNEL}" | grep "download_url" | grep -o "https.*/header-.*.tar.gz" | head -n 1)"
     if [ -n "${SERVER_KERNEL_HEADER}" ]; then
         SERVER_KERNEL_HEADER_NAME="${SERVER_KERNEL_HEADER##*/}"
         SERVER_KERNEL_HEADER_NAME="${SERVER_KERNEL_HEADER_NAME//%2B/+}"
@@ -175,11 +177,12 @@ if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ne 3 ]; then
     sync
 fi
 
-if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ge 3 ]; then
-
-    if [ $(ls ${P4_PATH}/boot-*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ge 1 ]; then
-        build_boot=$(ls ${P4_PATH}/boot-*.tar.gz | head -n 1) && build_boot=${build_boot##*/}
+if [ $(ls ${P4_PATH}/*${INPUTS_KERNEL}*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ge 3 ]; then
+    if [ $(ls ${P4_PATH}/boot-${INPUTS_KERNEL}-*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ge 1 ]; then
+        build_boot=$(ls ${P4_PATH}/boot-${INPUTS_KERNEL}-*.tar.gz | head -n 1) && build_boot=${build_boot##*/}
         flippy_version=${build_boot/boot-/} && flippy_version=${flippy_version/.tar.gz/}
+        echo -e "flippy_version: ${flippy_version} "
+
         kernel_version=$(echo ${flippy_version} | grep -oE '^[1-9].[0-9]{1,2}.[0-9]+')
         kernel_vermaj=$(echo ${kernel_version} | grep -oE '^[1-9].[0-9]{1,2}')
         k510_ver=${kernel_vermaj%%.*}
@@ -216,8 +219,6 @@ if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ge 3 ]; then
     else
         build_header=""
     fi
-
-    echo -e "flippy_version: ${flippy_version} "
 else
     echo -e "Please upload the kernel files to [ ${P4_PATH} ], then run [ $0 ] again."
     exit 1
@@ -410,7 +411,7 @@ if [[ -n "${build_header}" && -f "${P4_PATH}/${build_header}" ]]; then
     sleep 3
 fi
 
-rm -f ${P4_PATH}/dtb-${MYDTB_FILE}-*.tar.gz ${P4_PATH}/boot-*.tar.gz ${P4_PATH}/modules-*.tar.gz ${P4_PATH}/header-*.tar.gz 2>/dev/null
+rm -f ${P4_PATH}/*${flippy_version}*.tar.gz 2>/dev/null
 sync
 wait
 
