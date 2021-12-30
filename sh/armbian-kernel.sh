@@ -27,7 +27,7 @@ INPUTS_SOC="${1}"
 INPUTS_KERNEL="${2}"
 
 # Specify version branch, such as: stable
-ARR_BRANCH=("stable" "beta")
+ARR_BRANCH=("stable" "dev")
 if [[ -n "${3}" && -n "$(echo "${ARR_BRANCH[@]}" | grep -w "${3}")" ]]; then
     version_branch="${3}"
 else
