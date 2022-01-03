@@ -17,7 +17,7 @@ armbian_dtbpath=https://github.com/ophub/amlogic-s9xxx-openwrt/trunk/amlogic-s9x
 #===== Do not modify the following parameter settings, End =======
 
 die() {
-    echo -e " [ \033[1;31m Error \033[0m ] ${1}"
+    echo -e " [ \033[1;91m Error \033[0m ] ${1}"
     exit 1
 }
 
