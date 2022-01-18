@@ -16,12 +16,12 @@ armbian_outputpath=${make_path}/build/output/images
 armbian_dtbpath=https://github.com/ophub/amlogic-s9xxx-openwrt/trunk/amlogic-s9xxx/amlogic-dtb
 #===== Do not modify the following parameter settings, End =======
 
-die() {
+error_msg() {
     echo -e " [ \033[1;91m Error \033[0m ] ${1}"
     exit 1
 }
 
-[ $(id -u) = 0 ] || die "please run this script as root: [ sudo ./extract-kernel.sh ]"
+[ $(id -u) = 0 ] || error_msg "please run this script as root: [ sudo ./extract-kernel.sh ]"
 
 echo "Start build kernel for amlogic-s9xxx-openwrt ..."
 
@@ -35,17 +35,17 @@ echo "armbian: ${armbian_old}"
 
 echo "mount armbian ..."
 loop_old=$(losetup -P -f --show "${armbian_old}")
-[ ${loop_old} ] || die "losetup ${armbian_old} failed."
+[ ${loop_old} ] || error_msg "losetup ${armbian_old} failed."
 
 if ! mount ${loop_old}p1 ${armbian_tmp}; then
-    die "mount ${loop_old}p1 failed!"
+    error_msg "mount ${loop_old}p1 failed!"
 fi
 sync && sleep 3
 
 echo "Copy modules files"
 cp -rf ${armbian_tmp}/lib/modules/* ${modules_tmp} && sync
 if [ $(ls ${modules_tmp}/ -l 2>/dev/null | grep "^d" | wc -l) -eq 0 ]; then
-    die "The modules files is Missing!"
+    error_msg "The modules files is Missing!"
 fi
 armbian_version=$(ls ${modules_tmp}/)
 echo "armbian_version: ${armbian_version}"
@@ -56,7 +56,7 @@ echo "kernel_version: ${kernel_version}"
 echo "Copy five boo kernel files"
 cp -f ${armbian_tmp}/boot/{config-*,initrd.img-*,System.map-*,uInitrd-*,vmlinuz-*} ${kernel_tmp} && sync
 if [ ! -f ${kernel_tmp}/config-* -o ! -f ${kernel_tmp}/initrd.img-* -o ! -f ${kernel_tmp}/System.map-* -o ! -f ${kernel_tmp}/uInitrd-* -o ! -f ${kernel_tmp}/vmlinuz-* ]; then
-    die "The five boot kernel files is Missing!"
+    error_msg "The five boot kernel files is Missing!"
 fi
 
 echo "supplement .dtb file from github.com ..."

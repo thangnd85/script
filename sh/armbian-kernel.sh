@@ -48,7 +48,7 @@ GITHUB_RAW="https://raw.githubusercontent.com/ophub/luci-app-amlogic/main/depend
 SERVER_KERNEL_URL="https://api.github.com/repos/ophub/kernel/contents/pub/${version_branch}"
 
 # Encountered a serious error, abort the script execution
-die() {
+error_msg() {
     echo -e " [Error] ${1}"
     exit 1
 }
@@ -56,7 +56,7 @@ die() {
 # Current device model
 MYDEVICE_NAME=$(cat /proc/device-tree/model | tr -d '\000')
 if [[ -z "${MYDEVICE_NAME}" ]]; then
-    die "The device name is empty and cannot be recognized."
+    error_msg "The device name is empty and cannot be recognized."
 elif [[ "$(echo ${MYDEVICE_NAME} | grep "Chainedbox L1 Pro")" != "" ]]; then
     MYDTB_FILE="rockchip"
     MYBOOT_VMLINUZ="Image"
@@ -136,7 +136,7 @@ if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ne 3 ]; then
     if [[ "$?" -eq "0" && -s "${P4_PATH}/${SERVER_KERNEL_BOOT_NAME}" ]]; then
         echo -e "01.01 The boot file download complete."
     else
-        die "01.01 The boot file failed to download."
+        error_msg "01.01 The boot file failed to download."
     fi
 
     # Download dtb file
@@ -147,7 +147,7 @@ if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ne 3 ]; then
     if [[ "$?" -eq "0" && -s "${P4_PATH}/${SERVER_KERNEL_DTB_NAME}" ]]; then
         echo -e "01.02 The dtb file download complete."
     else
-        die "01.02 The dtb file failed to download."
+        error_msg "01.02 The dtb file failed to download."
     fi
 
     # Download modules file
@@ -158,7 +158,7 @@ if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ne 3 ]; then
     if [[ "$?" -eq "0" && -s "${P4_PATH}/${SERVER_KERNEL_MODULES_NAME}" ]]; then
         echo -e "01.03 The modules file download complete."
     else
-        die "01.03 The modules file failed to download."
+        error_msg "01.03 The modules file failed to download."
     fi
 
     # Download header file
@@ -170,7 +170,7 @@ if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ne 3 ]; then
         if [[ "$?" -eq "0" && -s "${P4_PATH}/${SERVER_KERNEL_HEADER_NAME}" ]]; then
             echo -e "01.04 The header file download complete."
         else
-            die "01.04 The header file failed to download."
+            error_msg "01.04 The header file failed to download."
         fi
     fi
 
@@ -199,19 +199,19 @@ if [ $(ls ${P4_PATH}/*${INPUTS_KERNEL}*.tar.gz -l 2>/dev/null | grep "^-" | wc -
             K510=0
         fi
     else
-        die "Have no boot-*.tar.gz file found in the ${P4_PATH} directory."
+        error_msg "Have no boot-*.tar.gz file found in the ${P4_PATH} directory."
     fi
 
     if [ -f ${P4_PATH}/dtb-${MYDTB_FILE}-${flippy_version}.tar.gz ]; then
         build_dtb="dtb-${MYDTB_FILE}-${flippy_version}.tar.gz"
     else
-        die "Have no dtb-${MYDTB_FILE}-*.tar.gz file found in the ${P4_PATH} directory."
+        error_msg "Have no dtb-${MYDTB_FILE}-*.tar.gz file found in the ${P4_PATH} directory."
     fi
 
     if [ -f ${P4_PATH}/modules-${flippy_version}.tar.gz ]; then
         build_modules="modules-${flippy_version}.tar.gz"
     else
-        die "Have no modules-*.tar.gz file found in the ${P4_PATH} directory."
+        error_msg "Have no modules-*.tar.gz file found in the ${P4_PATH} directory."
     fi
 
     if [ -f ${P4_PATH}/header-${flippy_version}.tar.gz ]; then
@@ -273,7 +273,7 @@ if [[ "${V510}" -lt "${K510}" && "${MYDTB_FILE}" == "amlogic" ]]; then
             UBOOT_OVERLOAD="u-boot-gtkingpro.bin"
             MAINLINE_UBOOT="gtkingpro-u-boot.bin.sd.bin"
             ;;
-        *) die "Unknown SOC, unable to update to kernel 5.10 and above." ;;
+        *) error_msg "Unknown SOC, unable to update to kernel 5.10 and above." ;;
         esac
 
         # Check ${UBOOT_OVERLOAD}
@@ -286,13 +286,13 @@ if [[ "${V510}" -lt "${K510}" && "${MYDTB_FILE}" == "amlogic" ]]; then
                 if [[ "$?" -eq "0" && -s "/boot/${UBOOT_OVERLOAD}" ]]; then
                     echo -e "The ${UBOOT_OVERLOAD} file download is complete."
                 else
-                    die "The ${UBOOT_OVERLOAD} file download failed. please try again."
+                    error_msg "The ${UBOOT_OVERLOAD} file download failed. please try again."
                 fi
             else
                 echo -e "The ${UBOOT_OVERLOAD} file has been found."
             fi
         else
-            die "The 5.10 kernel cannot be used without UBOOT_OVERLOAD."
+            error_msg "The 5.10 kernel cannot be used without UBOOT_OVERLOAD."
         fi
 
         # Check ${MAINLINE_UBOOT}
@@ -306,12 +306,12 @@ if [[ "${V510}" -lt "${K510}" && "${MYDTB_FILE}" == "amlogic" ]]; then
                 if [[ "$?" -eq "0" && -f "/lib/u-boot/${MAINLINE_UBOOT}" ]]; then
                     echo -e "The MAINLINE_UBOOT file download is complete."
                 else
-                    die "The MAINLINE_UBOOT file download failed. please try again."
+                    error_msg "The MAINLINE_UBOOT file download failed. please try again."
                 fi
             fi
         fi
     else
-        die "Unknown SOC, unable to update."
+        error_msg "Unknown SOC, unable to update."
     fi
 
     # Copy u-boot.ext and u-boot.emmc
@@ -320,7 +320,7 @@ if [[ "${V510}" -lt "${K510}" && "${MYDTB_FILE}" == "amlogic" ]]; then
         cp -f "/boot/${UBOOT_OVERLOAD}" /boot/u-boot.emmc && sync && chmod +x /boot/u-boot.emmc
         echo -e "The ${UBOOT_OVERLOAD} file copy is complete."
     else
-        die "The UBOOT_OVERLOAD file is missing and cannot be update."
+        error_msg "The UBOOT_OVERLOAD file is missing and cannot be update."
     fi
 
     # Write Mainline bootloader
@@ -354,9 +354,9 @@ if [[ -f "/boot/uInitrd-${flippy_version}" ]]; then
             continue
         fi
     done
-    [ "${i}" -eq "10" ] && die "/boot/uInitrd-${flippy_version} file copy failed."
+    [ "${i}" -eq "10" ] && error_msg "/boot/uInitrd-${flippy_version} file copy failed."
 else
-    die "/boot/uInitrd-${flippy_version} file is missing."
+    error_msg "/boot/uInitrd-${flippy_version} file is missing."
 fi
 
 if [[ -f "/boot/vmlinuz-${flippy_version}" ]]; then
@@ -374,13 +374,13 @@ if [[ -f "/boot/vmlinuz-${flippy_version}" ]]; then
             continue
         fi
     done
-    [ "${i}" -eq "10" ] && die "/boot/vmlinuz-${flippy_version} file copy failed."
+    [ "${i}" -eq "10" ] && error_msg "/boot/vmlinuz-${flippy_version} file copy failed."
 else
-    die "/boot/vmlinuz-${flippy_version} file is missing."
+    error_msg "/boot/vmlinuz-${flippy_version} file is missing."
 fi
 
-[ -f "/boot/config-${flippy_version}" ] || die "/boot/config-${flippy_version} file is missing."
-[ -f "/boot/System.map-${flippy_version}" ] || die "/boot/System.map-${flippy_version} file is missing."
+[ -f "/boot/config-${flippy_version}" ] || error_msg "/boot/config-${flippy_version} file is missing."
+[ -f "/boot/System.map-${flippy_version}" ] || error_msg "/boot/System.map-${flippy_version} file is missing."
 
 echo -e "02.01 Unpack [ ${build_boot} ] complete."
 sleep 3
@@ -392,7 +392,7 @@ if [[ "${MYDTB_FILE}" == "rockchip" ]]; then
     ln -sf /boot/dtb-${flippy_version} /boot/dtb
 fi
 tar -xzf ${P4_PATH}/${build_dtb} -C /boot/dtb/${MYDTB_FILE} && sync
-[ "$(ls /boot/dtb/${MYDTB_FILE} -l 2>/dev/null | grep "^-" | wc -l)" -ge "1" ] || die "/boot/dtb/${MYDTB_FILE} file is missing."
+[ "$(ls /boot/dtb/${MYDTB_FILE} -l 2>/dev/null | grep "^-" | wc -l)" -ge "1" ] || error_msg "/boot/dtb/${MYDTB_FILE} file is missing."
 echo -e "02.02 Unpack [ ${build_dtb} ] complete."
 sleep 3
 
@@ -400,7 +400,7 @@ sleep 3
 rm -rf /lib/modules/* 2>/dev/null && sync
 tar -xzf ${P4_PATH}/${build_modules} -C /lib/modules && sync
 (cd /lib/modules/${flippy_version} && echo "build source" | xargs rm -f)
-[[ -d "/lib/modules/${flippy_version}" ]] || die "/lib/modules/${flippy_version} kernel folder is missing."
+[[ -d "/lib/modules/${flippy_version}" ]] || error_msg "/lib/modules/${flippy_version} kernel folder is missing."
 echo -e "02.03 Unpack [ ${build_modules} ] complete."
 sleep 3
 
