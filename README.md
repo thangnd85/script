@@ -116,4 +116,5 @@ sudo apt-get autoremove -y
 ```
 
 ## License
-- [LICENSE](https://github.com/ophub/script/blob/main/LICENSE) © OPHUB
+
+The script © OPHUB is licensed under [GPL-2.0](https://github.com/ophub/script/blob/main/LICENSE)
