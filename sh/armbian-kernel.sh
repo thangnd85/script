@@ -1,24 +1,24 @@
 #!/bin/bash
-#=======================================================================================================================
-# Copyright (C) 2020- https://github.com/unifreq/openwrt_packit
-# Copyright (C) 2021- https://github.com/ophub/script
+#============================================================================================================================
+# This file is licensed under the terms of the GNU General Public
+# License version 2. This program is licensed "as is" without any
+# warranty of any kind, whether express or implied.
 #
-# Description: Armbian kernel update (Amlogic s9xxx, Allwinner, Rockchip)
-# Kernel download: https://github.com/ophub/flippy-kernel/tree/main/library
+# This file is a part of the script
+# https://github.com/ophub/script
 #
-# When the kernel version is upgraded from 5.10 or lower to 5.10 or higher, need to install U-BOOT.
-# When there is no U-BOOT file in related directory, the script will auto try to download the file from the server:
-# UBOOT_OVERLOAD: https://github.com/ophub/luci-app-amlogic/tree/main/depends/meson_btld/without_fip
-# MAINLINE_UBOOT: https://github.com/ophub/luci-app-amlogic/tree/main/depends/meson_btld/with_fip
-#=======================================================================================================================
-# Update kernel command:
-# armbian-kernel.sh s905x3 5.10.60
+# Function: Armbian kernel update
+# Copyright (C) 2021 https://github.com/unifreq
+# Copyright (C) 2021 https://github.com/ophub/script
 #
-# Choose a different kernel branch
-# armbian-kernel.sh s905x3 5.10.60 stable
+# Kernel download server: https://github.com/ophub/kernel/tree/main/pub
 #
-# When the kernel version is upgraded from 5.10 or lower to 5.10 or higher, Can choose to install the MAINLINE_UBOOT.
-# armbian-kernel.sh s905x3 5.10.60 stable yes
+# Command: bash <(curl -fsSL git.io/armbian-kernel) <soc> <kernel_version> <version_branch> <mainline_uboot>
+# Required command parameters: bash <(curl -fsSL git.io/armbian-kernel) <soc> <kernel_version>
+# The kernel above version 5.10 needs to install mainline u-boot
+# The mainline u-boot is installed by default: bash <(curl -fsSL git.io/armbian-kernel) s905x3 5.4.180 stable yes
+# Don't write mainline u-boot command: bash <(curl -fsSL git.io/armbian-kernel) s905x3 5.4.180 stable no
+#============================================================================================================================
 
 echo -e "Ready to update, please wait..."
 
@@ -42,14 +42,14 @@ else
 fi
 
 # The UBOOT_OVERLOAD and MAINLINE_UBOOT files download path
-GITHUB_RAW="https://raw.githubusercontent.com/ophub/luci-app-amlogic/main/depends/meson_btld"
+depends_repo="https://raw.githubusercontent.com/ophub/amlogic-s9xxx-armbian/main/build-armbian"
 
 # Check the version on the server
 SERVER_KERNEL_URL="https://api.github.com/repos/ophub/kernel/contents/pub/${version_branch}"
 
 # Encountered a serious error, abort the script execution
 error_msg() {
-    echo -e " [Error] ${1}"
+    echo -e "[Error] ${1}"
     exit 1
 }
 
@@ -76,8 +76,7 @@ sleep 3
 # Find the partition where root is located
 ROOT_PTNAME=$(df / | tail -n1 | awk '{print $1}' | awk -F '/' '{print $3}')
 if [ "${ROOT_PTNAME}" == "" ]; then
-    echo "Cannot find the partition corresponding to the root file system!"
-    exit 1
+    error_msg "Cannot find the partition corresponding to the root file system!"
 fi
 
 # Find the disk where the partition is located, only supports mmcblk?p? sd?? hd?? vd?? and other formats
@@ -89,8 +88,7 @@ mmcblk?p[1-4])
     EMMC_NAME="$(echo ${ROOT_PTNAME} | awk '{print substr($1, 1, length($1)-1)}')"
     ;;
 *)
-    echo "Unable to recognize the disk type of ${ROOT_PTNAME}!"
-    exit 1
+    error_msg "Unable to recognize the disk type of ${ROOT_PTNAME}!"
     ;;
 esac
 P4_PATH="${PWD}"
@@ -105,7 +103,7 @@ else
 fi
 echo -e "SOC: ${SOC}"
 
-# Download 3 kernel files
+# Download 4 kernel files
 if [ $(ls ${P4_PATH}/*.tar.gz -l 2>/dev/null | grep "^-" | wc -l) -ne 3 ]; then
 
     if [[ -z "${INPUTS_KERNEL}" ]]; then
@@ -220,8 +218,7 @@ if [ $(ls ${P4_PATH}/*${INPUTS_KERNEL}*.tar.gz -l 2>/dev/null | grep "^-" | wc -
         build_header=""
     fi
 else
-    echo -e "Please upload the kernel files to [ ${P4_PATH} ], then run [ $0 ] again."
-    exit 1
+    error_msg "Please upload the kernel files to [ ${P4_PATH} ], then run [ $0 ] again."
 fi
 
 MODULES_OLD=$(ls /lib/modules/ 2>/dev/null)
@@ -280,7 +277,7 @@ if [[ "${V510}" -lt "${K510}" && "${MYDTB_FILE}" == "amlogic" ]]; then
         if [[ -n "${UBOOT_OVERLOAD}" ]]; then
             if [[ ! -s "/boot/${UBOOT_OVERLOAD}" ]]; then
                 echo -e "Try to download the ${UBOOT_OVERLOAD} file from the server."
-                GITHUB_UBOOT_OVERLOAD="${GITHUB_RAW}/without_fip/${UBOOT_OVERLOAD}"
+                GITHUB_UBOOT_OVERLOAD="${depends_repo}/amlogic-u-boot/${UBOOT_OVERLOAD}"
                 #echo -e "UBOOT_OVERLOAD: ${GITHUB_UBOOT_OVERLOAD}"
                 wget -c "${GITHUB_UBOOT_OVERLOAD}" -O "/boot/${UBOOT_OVERLOAD}" >/dev/null 2>&1 && sync
                 if [[ "$?" -eq "0" && -s "/boot/${UBOOT_OVERLOAD}" ]]; then
@@ -299,11 +296,11 @@ if [[ "${V510}" -lt "${K510}" && "${MYDTB_FILE}" == "amlogic" ]]; then
         if [[ -n "${MAINLINE_UBOOT}" && "${AUTO_MAINLINE_UBOOT}" == "yes" ]]; then
             if [[ ! -s "${MAINLINE_UBOOT}" ]]; then
                 echo -e "Try to download the MAINLINE_UBOOT file from the server."
-                GITHUB_MAINLINE_UBOOT="${GITHUB_RAW}/with_fip/${MAINLINE_UBOOT}"
+                GITHUB_MAINLINE_UBOOT="${depends_repo}/common-files/files/usr/lib/u-boot/${MAINLINE_UBOOT}"
                 #echo -e "MAINLINE_UBOOT: ${GITHUB_MAINLINE_UBOOT}"
                 [ -d "/lib/u-boot" ] || mkdir -p /lib/u-boot
                 wget -c "${GITHUB_MAINLINE_UBOOT}" -O "/lib/u-boot/${MAINLINE_UBOOT}" >/dev/null 2>&1 && sync
-                if [[ "$?" -eq "0" && -f "/lib/u-boot/${MAINLINE_UBOOT}" ]]; then
+                if [[ "$?" -eq "0" && -s "/lib/u-boot/${MAINLINE_UBOOT}" ]]; then
                     echo -e "The MAINLINE_UBOOT file download is complete."
                 else
                     error_msg "The MAINLINE_UBOOT file download failed. please try again."
