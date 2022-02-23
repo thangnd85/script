@@ -42,7 +42,7 @@ else
 fi
 
 # The UBOOT_OVERLOAD and MAINLINE_UBOOT files download path
-depends_repo="https://raw.githubusercontent.com/ophub/amlogic-s9xxx-armbian/main/build-armbian"
+depends_repo="https://raw.githubusercontent.com/ophub/amlogic-s9xxx-armbian/main/build-armbian/amlogic-u-boot"
 
 # Check the version on the server
 SERVER_KERNEL_URL="https://api.github.com/repos/ophub/kernel/contents/pub/${version_branch}"
@@ -277,7 +277,7 @@ if [[ "${V510}" -lt "${K510}" && "${MYDTB_FILE}" == "amlogic" ]]; then
         if [[ -n "${UBOOT_OVERLOAD}" ]]; then
             if [[ ! -s "/boot/${UBOOT_OVERLOAD}" ]]; then
                 echo -e "Try to download the ${UBOOT_OVERLOAD} file from the server."
-                GITHUB_UBOOT_OVERLOAD="${depends_repo}/amlogic-u-boot/${UBOOT_OVERLOAD}"
+                GITHUB_UBOOT_OVERLOAD="${depends_repo}/overload/${UBOOT_OVERLOAD}"
                 #echo -e "UBOOT_OVERLOAD: ${GITHUB_UBOOT_OVERLOAD}"
                 wget -c "${GITHUB_UBOOT_OVERLOAD}" -O "/boot/${UBOOT_OVERLOAD}" >/dev/null 2>&1 && sync
                 if [[ "$?" -eq "0" && -s "/boot/${UBOOT_OVERLOAD}" ]]; then
@@ -296,7 +296,7 @@ if [[ "${V510}" -lt "${K510}" && "${MYDTB_FILE}" == "amlogic" ]]; then
         if [[ -n "${MAINLINE_UBOOT}" && "${AUTO_MAINLINE_UBOOT}" == "yes" ]]; then
             if [[ ! -s "${MAINLINE_UBOOT}" ]]; then
                 echo -e "Try to download the MAINLINE_UBOOT file from the server."
-                GITHUB_MAINLINE_UBOOT="${depends_repo}/common-files/files/usr/lib/u-boot/${MAINLINE_UBOOT}"
+                GITHUB_MAINLINE_UBOOT="${depends_repo}/bootloader/${MAINLINE_UBOOT}"
                 #echo -e "MAINLINE_UBOOT: ${GITHUB_MAINLINE_UBOOT}"
                 [ -d "/lib/u-boot" ] || mkdir -p /lib/u-boot
                 wget -c "${GITHUB_MAINLINE_UBOOT}" -O "/lib/u-boot/${MAINLINE_UBOOT}" >/dev/null 2>&1 && sync
@@ -323,8 +323,8 @@ if [[ "${V510}" -lt "${K510}" && "${MYDTB_FILE}" == "amlogic" ]]; then
     # Write Mainline bootloader
     if [[ -f "/lib/u-boot/${MAINLINE_UBOOT}" && "${AUTO_MAINLINE_UBOOT}" == "yes" ]]; then
         echo -e "Write Mainline bootloader: [ ${MAINLINE_UBOOT} ] to [ /dev/${EMMC_NAME} ]"
-        dd if=/lib/u-boot/${MAINLINE_UBOOT} of=/dev/${EMMC_NAME} bs=1 count=442 conv=fsync
-        dd if=/lib/u-boot/${MAINLINE_UBOOT} of=/dev/${EMMC_NAME} bs=512 skip=1 seek=1 conv=fsync
+        dd if="/lib/u-boot/${MAINLINE_UBOOT}" of="/dev/${EMMC_NAME}" bs=1 count=442 conv=fsync
+        dd if="/lib/u-boot/${MAINLINE_UBOOT}" of="/dev/${EMMC_NAME}" bs=512 skip=1 seek=1 conv=fsync
         echo -e "The MAINLINE_UBOOT file write is complete."
     fi
 fi
