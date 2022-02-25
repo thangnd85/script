@@ -14,7 +14,7 @@ Support `update kernel` of Armbian system of made and shared by [flippy](https:/
 
 ```shell
 # E.g: Run as root user (sudo -i)
-bash <(curl -fsSL git.io/armbian-kernel) s905x3 5.10.80
+bash <(curl -fsSL git.io/armbian-kernel) s905x3 5.4.180
 ```
 
 Tips: The headers file is installed in the `/use/local/include` directory.
